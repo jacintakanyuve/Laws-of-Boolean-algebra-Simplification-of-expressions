@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Законы алгебры логики - 8 класс (Интерактивный курс)</title>
+    <style>
+        /* =========================================
+           CYBER GLASSMORPHISM (DARK THEME)
+           ========================================= */
+        :root {
+            --bg-color: #090a0f;
+            --neon-blue: #00f0ff;
+            --neon-pink: #ff007f;
+            --neon-yellow: #ffea00;
+            --neon-green: #39ff14;
+            --glass-bg: rgba(15, 20, 30, 0.65);
+            --glass-border: rgba(0, 240, 255, 0.25);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --success: #39ff14;
+            --error: #ff003c;
+            --accent-glow: 0 0 10px var(--neon-blue);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Фоновые неоновые сферы */
+        .bg-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.3;
+            animation: pulse 15s infinite alternate ease-in-out;
+        }
+        .orb-1 { width: 350px; height: 350px; background: var(--neon-blue); top: -50px; left: -50px; }
+        .orb-2 { width: 400px; height: 400px; background: var(--neon-pink); bottom: -100px; right: -50px; animation-delay: -5s; }
+
+        @keyframes pulse {
+            0% { transform: scale(1) translate(0, 0); opacity: 0.2; }
+            100% { transform: scale(1.2) translate(40px, -40px); opacity: 0.5; }
+        }
+
+        /* Утилиты Glassmorphism */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: var(--glass-shadow);
+        }
+
+        /* Шапка и Вкладки */
+        header {
+            width: 100%;
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+            text-align: center;
+            color: #fff;
+            margin-bottom: 15px;
+            text-shadow: var(--accent-glow);
+            line-height: 1.3;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .tab-btn {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--text-muted);
+            color: var(--text-muted);
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: rgba(0, 240, 255, 0.15);
+            border-color: var(--neon-blue);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+        }
+
+        .tab-content {
+            display: none;
+            width: 100%;
+            max-width: 900px;
+            padding: 20px 10px 80px 10px;
+            animation: fadeIn 0.4s ease-out;
+        }
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Кнопка озвучки */
+        .btn-speak {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--neon-pink);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.1rem;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.3);
+            transition: all 0.3s;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+        .btn-speak.playing {
+            background: var(--neon-pink);
+            box-shadow: 0 0 20px var(--neon-pink);
+            transform: scale(0.95);
+        }
+
+        /* === ВКЛАДКА 1: ИНТЕЛЛЕКТ-КАРТА === */
+        .mindmap-node {
+            width: 95%;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--neon-blue);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .node-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            cursor: pointer;
+            background: rgba(0,0,0,0.2);
+        }
+        
+        .node-header h2 {
+            font-size: 1.2rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .node-header .toggle-icon {
+            font-size: 0.9rem;
+            transition: transform 0.3s;
+            color: var(--neon-blue);
+        }
+
+        .mindmap-node.expanded .toggle-icon {
+            transform: rotate(90deg);
+        }
+
+        .node-body {
+            padding: 0 20px 20px 20px;
+            display: none;
+        }
+
+        .mindmap-node.expanded .node-body {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .node-body p {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            margin-top: 10px;
+        }
+
+        .highlight { color: var(--neon-blue); font-weight: bold; }
+        .formula { 
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--text-muted);
+            color: var(--neon-yellow);
+            font-family: monospace;
+            font-size: 1.1rem;
+            margin: 2px 0;
+        }
+
+        /* === ВКЛАДКА 2: СИМУЛЯТОР === */
+        .sim-container {
+            width: 95%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .sim-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+        }
+        
+        .btn-nav {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--neon-blue);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+            font-size: 1rem;
+        }
+        .btn-nav:hover:not(:disabled) {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: 0 0 15px var(--neon-blue);
+        }
+        .btn-nav:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            border-color: var(--text-muted);
+        }
+        
+        .step-board {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-height: 300px;
+        }
+
+        .step-row {
+            display: none; /* скрыто по умолчанию */
+            flex-direction: column;
+            gap: 5px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed rgba(255,255,255,0.1);
+            animation: slideInLeft 0.4s ease-out forwards;
+        }
+
+        .step-row.visible {
+            display: flex;
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .step-expr {
+            font-family: monospace;
+            font-size: 1.3rem;
+            color: var(--neon-green);
+            text-shadow: 0 0 8px rgba(57, 255, 20, 0.4);
+            font-weight: bold;
+        }
+        .step-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        /* === ВКЛАДКА 3: ТЕСТ === */
+        .quiz-card {
+            width: 95%;
+            padding: 25px;
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .quiz-card.active { display: flex; animation: fadeIn 0.4s; }
+        
+        .q-text { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; color: var(--text-main);}
+        .options { display: flex; flex-direction: column; gap: 12px; }
+        .opt-btn {
+            background: rgba(0,0,0,0.3); border: 1px solid var(--text-muted);
+            color: #fff; padding: 15px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 1rem;
+            transition: all 0.2s;
+        }
+        .opt-btn:hover { background: rgba(255,255,255,0.1); }
+        .opt-btn.correct { background: rgba(57, 255, 20, 0.2); border-color: var(--success); box-shadow: 0 0 10px rgba(57, 255, 20, 0.4); }
+        .opt-btn.wrong { background: rgba(255, 0, 60, 0.2); border-color: var(--error); box-shadow: 0 0 10px rgba(255, 0, 60, 0.4); }
+        .quiz-feedback { min-height: 24px; font-weight: bold; font-size: 1.1rem; }
+        
+        /* Конфетти */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            z-index: 9999;
+            animation: fall 3s linear forwards;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+
+    <header>
+        <h1>Законы алгебры логики <br> Упрощение выражений</h1>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('tab-mindmap')">Интеллект-карта</button>
+            <button class="tab-btn" onclick="switchTab('tab-simulator')">Модульный симулятор</button>
+            <button class="tab-btn" onclick="switchTab('tab-quiz')">Тренажер</button>
+        </div>
+    </header>
+
+    <!-- ВКЛАДКА 1: ИНТЕЛЛЕКТ-КАРТА -->
+    <main id="tab-mindmap" class="tab-content active">
+        
+        <div class="mindmap-node glass expanded">
+            <div class="node-header" onclick="toggleNode(this)">
+                <h2><span class="toggle-icon">▶</span> 1. Основные операции</h2>
+                <button class="btn-speak" onclick="speakText('node1', this); event.stopPropagation();">🔊</button>
+            </div>
+            <div class="node-body" id="node1">
+                <p>В алгебре логики высказывания могут быть либо Истинными (1), либо Ложными (0).</p>
+                <p>🔹 <span class="highlight">Конъюнкция (Логическое И)</span> — обозначается знаком <b>&</b> или <b>*</b> или <b>∧</b>. Истинна, только если ОБА высказывания истинны.</p>
+                <p>🔹 <span class="highlight">Дизъюнкция (Логическое ИЛИ)</span> — обозначается знаком <b>v</b> или <b>+</b>. Истинна, если ХОТЯ БЫ ОДНО высказывание истинно.</p>
+                <p>🔹 <span class="highlight">Инверсия (Логическое НЕ)</span> — обозначается приставкой <b>НЕ</b>, чертой сверху или знаком <b>¬</b>. Меняет значение на противоположное: из 1 делает 0, из 0 делает 1.</p>
+            </div>
+        </div>
+
+        <div class="mindmap-node glass" style="border-left-color: var(--neon-pink);">
+            <div class="node-header" onclick="toggleNode(this)">
+                <h2 style="color: var(--neon-pink);"><span class="toggle-icon">▶</span> 2. Простые законы</h2>
+                <button class="btn-speak" onclick="speakText('node2', this); event.stopPropagation();">🔊</button>
+            </div>
+            <div class="node-body" id="node2">
+                <p><span class="highlight">Переместительный закон</span> (можно менять местами):<br>
+                <span class="formula">A v B = B v A</span> и <span class="formula">A & B = B & A</span></p>
+                <p><span class="highlight">Сочетательный закон</span> (скобки можно расставлять как удобно):<br>
+                <span class="formula">(A v B) v C = A v (B v C)</span></p>
+                <p><span class="highlight">Закон Идемпотентности</span> (повторения не нужны):<br>
+                <span class="formula">A v A = A</span> и <span class="formula">A & A = A</span></p>
+            </div>
+        </div>
+
+        <div class="mindmap-node glass" style="border-left-color: var(--neon-yellow);">
+            <div class="node-header" onclick="toggleNode(this)">
+                <h2 style="color: var(--neon-yellow);"><span class="toggle-icon">▶</span> 3. Распределительный закон</h2>
+                <button class="btn-speak" onclick="speakText('node3', this); event.stopPropagation();">🔊</button>
+            </div>
+            <div class="node-body" id="node3">
+                <p>Этот закон позволяет «раскрывать скобки» или «выносить общий множитель за скобки», подобно обычной математике.</p>
+                <p>🔹 Распределение И относительно ИЛИ:<br>
+                <span class="formula">A & (B v C) = (A & B) v (A & C)</span></p>
+                <p>🔹 Распределение ИЛИ относительно И (в математике такого нет!):<br>
+                <span class="formula">A v (B & C) = (A v B) & (A v C)</span></p>
+            </div>
+        </div>
+
+        <div class="mindmap-node glass" style="border-left-color: var(--neon-green);">
+            <div class="node-header" onclick="toggleNode(this)">
+                <h2 style="color: var(--neon-green);"><span class="toggle-icon">▶</span> 4. Законы де Моргана</h2>
+                <button class="btn-speak" onclick="speakText('node4', this); event.stopPropagation();">🔊</button>
+            </div>
+            <div class="node-body" id="node4">
+                <p>Одни из самых важных законов для упрощения. Они показывают, как правильно раскрыть отрицание (НЕ) перед скобкой.</p>
+                <p>Правило: "Отрицание заходит в скобку, меняет каждый элемент на противоположный, а знак И меняет на ИЛИ (и наоборот)".</p>
+                <p>🔹 <span class="formula">НЕ (A v B) = (НЕ A) & (НЕ B)</span></p>
+                <p>🔹 <span class="formula">НЕ (A & B) = (НЕ A) v (НЕ B)</span></p>
+            </div>
+        </div>
+
+        <div class="mindmap-node glass" style="border-left-color: #ff8800;">
+            <div class="node-header" onclick="toggleNode(this)">
+                <h2 style="color: #ff8800;"><span class="toggle-icon">▶</span> 5. Исключение констант и поглощение</h2>
+                <button class="btn-speak" onclick="speakText('node5', this); event.stopPropagation();">🔊</button>
+            </div>
+            <div class="node-body" id="node5">
+                <p>Законы исключения констант (0 - Ложь, 1 - Истина):</p>
+                <p>🔹 <span class="formula">A v 1 = 1</span> и <span class="formula">A v 0 = A</span></p>
+                <p>🔹 <span class="formula">A & 1 = A</span> и <span class="formula">A & 0 = 0</span></p>
+                <p>Закон исключения третьего (переменная и её отрицание):</p>
+                <p>🔹 <span class="formula">A v (НЕ A) = 1</span> (одно из них точно истина)</p>
+                <p>🔹 <span class="formula">A & (НЕ A) = 0</span> (они не могут быть истинны одновременно)</p>
+                <p>Закон поглощения:</p>
+                <p>🔹 <span class="formula">A v (A & B) = A</span></p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ВКЛАДКА 2: СИМУЛЯТОР УПРОЩЕНИЯ -->
+    <main id="tab-simulator" class="tab-content">
+        <div class="sim-container">
+            <h2 style="text-align: center; color: var(--neon-blue); margin-bottom: 10px;">Разбор примера</h2>
+            
+            <div class="step-board glass" id="sim-board">
+                <!-- Шаг 0 (Исходное) -->
+                <div class="step-row visible" id="step-0">
+                    <div class="step-desc">Исходное выражение:</div>
+                    <div class="step-expr">¬(A v B) v (A & ¬B)</div>
+                </div>
+
+                <!-- Шаг 1 -->
+                <div class="step-row" id="step-1">
+                    <div class="step-desc">1) Применяем <b>Закон де Моргана</b> к первой скобке ¬(A v B):</div>
+                    <div class="step-expr">(¬A & ¬B) v (A & ¬B)</div>
+                </div>
+
+                <!-- Шаг 2 -->
+                <div class="step-row" id="step-2">
+                    <div class="step-desc">2) Видим общий множитель <b>¬B</b> в обеих частях. Выносим его за скобки (<b>Распределительный закон</b>):</div>
+                    <div class="step-expr">¬B & (¬A v A)</div>
+                </div>
+
+                <!-- Шаг 3 -->
+                <div class="step-row" id="step-3">
+                    <div class="step-desc">3) Скобка (¬A v A) — это <b>Закон исключения третьего</b> (равна 1):</div>
+                    <div class="step-expr">¬B & 1</div>
+                </div>
+
+                <!-- Шаг 4 -->
+                <div class="step-row" id="step-4">
+                    <div class="step-desc">4) Умножение на 1 по <b>закону констант</b> не меняет выражение:</div>
+                    <div class="step-expr" style="color: var(--neon-yellow);">Ответ: ¬B</div>
+                </div>
+            </div>
+
+            <div class="sim-controls glass">
+                <button class="btn-nav" id="btn-restart-sim" onclick="resetSim()">🔄 Заново</button>
+                <button class="btn-nav" id="btn-next-sim" onclick="nextSimStep()">Следующий шаг ➡</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- ВКЛАДКА 3: ТЕСТ (ТРЕНАЖЕР) -->
+    <main id="tab-quiz" class="tab-content">
+        <div id="quiz-wrap" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <!-- Вопросы -->
+        </div>
+        <div id="quiz-result" class="glass" style="display: none; padding: 20px; text-align: center; width: 95%; margin-top: 20px;">
+            <h2 style="color: var(--neon-yellow); margin-bottom: 10px;">Результат: <span id="score-text"></span>/4</h2>
+            <button class="btn-nav" onclick="initQuiz()">Пройти заново 🔄</button>
+        </div>
+    </main>
+
+    <script>
+        // === НАВИГАЦИЯ ПО ВКЛАДКАМ ===
+        function switchTab(tabId) {
+            stopSpeech();
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // === ИНТЕЛЛЕКТ-КАРТА: СВОРАЧИВАНИЕ/РАЗВОРАЧИВАНИЕ ===
+        function toggleNode(headerEl) {
+            const node = headerEl.parentElement;
+            node.classList.toggle('expanded');
+        }
+
+        // === ОЗВУЧКА (Web Speech API) ===
+        let synth = window.speechSynthesis;
+        let currentUtterance = null;
+        let activeSpeakBtn = null;
+
+        function speakText(elementId, btn) {
+            let textEl = document.getElementById(elementId);
+            // Удаляем формулы из озвучки, чтобы не звучало как "А вэ бэ" неразборчиво
+            let textToRead = textEl.innerText.replace(/[A-Z]\s*[v&]\s*[A-Z10]/g, "формула"); 
+            
+            if (synth.speaking) {
+                synth.cancel();
+                if (activeSpeakBtn) activeSpeakBtn.classList.remove('playing');
+                if (activeSpeakBtn === btn) {
+                    activeSpeakBtn = null;
+                    return;
+                }
+            }
+
+            activeSpeakBtn = btn;
+            if(btn) btn.classList.add('playing');
+
+            currentUtterance = new SpeechSynthesisUtterance(textEl.innerText);
+            currentUtterance.lang = 'ru-RU';
+            currentUtterance.rate = 0.95;
+
+            currentUtterance.onend = () => {
+                if(btn) btn.classList.remove('playing');
+                activeSpeakBtn = null;
+            };
+            
+            currentUtterance.onerror = () => {
+                if(btn) btn.classList.remove('playing');
+                activeSpeakBtn = null;
+            };
+
+            synth.speak(currentUtterance);
+        }
+
+        function stopSpeech() {
+            if (synth.speaking) {
+                synth.cancel();
+                if (activeSpeakBtn) activeSpeakBtn.classList.remove('playing');
+                activeSpeakBtn = null;
+            }
+        }
+
+        // === СИМУЛЯТОР УПРОЩЕНИЯ ===
+        let currentSimStep = 0;
+        const totalSimSteps = 4;
+
+        function nextSimStep() {
+            if (currentSimStep < totalSimSteps) {
+                currentSimStep++;
+                document.getElementById(`step-${currentSimStep}`).classList.add('visible');
+                
+                // Прокрутка вниз
+                document.getElementById('sim-board').scrollTo({
+                    top: 1000,
+                    behavior: 'smooth'
+                });
+            }
+            if (currentSimStep === totalSimSteps) {
+                document.getElementById('btn-next-sim').disabled = true;
+            }
+        }
+
+        function resetSim() {
+            currentSimStep = 0;
+            for (let i = 1; i <= totalSimSteps; i++) {
+                document.getElementById(`step-${i}`).classList.remove('visible');
+            }
+            document.getElementById('btn-next-sim').disabled = false;
+        }
+
+        // === ЛОГИКА ТЕСТА ===
+        const questions = [
+            {
+                q: "1. Чему равно выражение НЕ(A ИЛИ B) согласно законам де Моргана?",
+                options: [
+                    { text: "НЕ A ИЛИ НЕ B", correct: false },
+                    { text: "НЕ A И НЕ B", correct: true },
+                    { text: "A И B", correct: false }
+                ]
+            },
+            {
+                q: "2. Как называется следующий закон: A & (B v C) = (A & B) v (A & C)?",
+                options: [
+                    { text: "Переместительный", correct: false },
+                    { text: "Сочетательный", correct: false },
+                    { text: "Распределительный", correct: true }
+                ]
+            },
+            {
+                q: "3. Упростите логическое выражение: A v A",
+                options: [
+                    { text: "A", correct: true },
+                    { text: "1", correct: false },
+                    { text: "2A", correct: false }
+                ]
+            },
+            {
+                q: "4. Чему равно выражение: A & (НЕ A)?",
+                options: [
+                    { text: "1 (Истина)", correct: false },
+                    { text: "0 (Ложь)", correct: true },
+                    { text: "A", correct: false }
+                ]
+            }
+        ];
+
+        let testScore = 0;
+        let answeredQuestions = new Set();
+
+        function initQuiz() {
+            testScore = 0;
+            answeredQuestions.clear();
+            const wrap = document.getElementById('quiz-wrap');
+            wrap.innerHTML = '';
+            document.getElementById('quiz-result').style.display = 'none';
+
+            questions.forEach((q, qIndex) => {
+                const card = document.createElement('div');
+                card.className = 'quiz-card glass';
+                if (qIndex === 0) card.classList.add('active');
+                card.id = `q-card-${qIndex}`;
+                
+                const qText = document.createElement('div');
+                qText.className = 'q-text';
+                qText.innerText = q.q;
+                card.appendChild(qText);
+
+                const optsDiv = document.createElement('div');
+                optsDiv.className = 'options';
+                
+                const feedback = document.createElement('div');
+                feedback.className = 'quiz-feedback';
+
+                q.options.forEach((opt, optIndex) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'opt-btn';
+                    btn.innerText = opt.text;
+                    btn.onclick = () => handleAnswer(btn, optsDiv, opt.correct, feedback, qIndex);
+                    optsDiv.appendChild(btn);
+                });
+
+                card.appendChild(optsDiv);
+                card.appendChild(feedback);
+                wrap.appendChild(card);
+            });
+        }
+
+        function handleAnswer(btn, optsDiv, isCorrect, feedback, qIndex) {
+            if(answeredQuestions.has(qIndex)) return;
+            answeredQuestions.add(qIndex);
+
+            // Блокируем остальные
+            Array.from(optsDiv.children).forEach(b => b.style.pointerEvents = 'none');
+
+            // Аудио фидбек (короткий синтез речи)
+            let msg = new SpeechSynthesisUtterance();
+            msg.lang = 'ru-RU';
+            msg.rate = 1.2;
+
+            if(isCorrect) {
+                btn.classList.add('correct');
+                feedback.innerText = "✅ Верно!";
+                feedback.style.color = "var(--success)";
+                testScore++;
+                msg.text = "Правильно!";
+            } else {
+                btn.classList.add('wrong');
+                feedback.innerText = "❌ Ошибка!";
+                feedback.style.color = "var(--error)";
+                msg.text = "Ошибка";
+                // Подсвечиваем правильный
+                Array.from(optsDiv.children).forEach((b, idx) => {
+                    if(questions[qIndex].options[idx].correct) b.classList.add('correct');
+                });
+            }
+            
+            synth.speak(msg);
+
+            // Переход к следующему вопросу
+            setTimeout(() => {
+                document.getElementById(`q-card-${qIndex}`).classList.remove('active');
+                if (qIndex + 1 < questions.length) {
+                    document.getElementById(`q-card-${qIndex + 1}`).classList.add('active');
+                } else {
+                    showFinalResult();
+                }
+            }, 1500);
+        }
+
+        function showFinalResult() {
+            document.getElementById('quiz-result').style.display = 'block';
+            document.getElementById('score-text').innerText = testScore;
+            
+            if (testScore === questions.length) {
+                throwConfetti();
+                let winMsg = new SpeechSynthesisUtterance("Идеально! 100 процентов!");
+                winMsg.lang = 'ru-RU';
+                synth.speak(winMsg);
+            }
+        }
+
+        // === ЭФФЕКТ КОНФЕТТИ ===
+        function throwConfetti() {
+            const colors = ['#00f0ff', '#ff007f', '#ffea00', '#39ff14'];
+            for (let i = 0; i < 70; i++) {
+                let confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => confetti.remove(), 5000);
+            }
+        }
+
+        // Запуск
+        initQuiz();
+
+    </script>
+</body>
+</html>
